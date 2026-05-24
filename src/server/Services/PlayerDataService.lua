@@ -8,6 +8,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 
 local Knit = require(ReplicatedStorage.Packages.Knit)
+local Signal = require(ReplicatedStorage.Packages.Signal)
 local ProfileStore = require(ServerScriptService.ServerPackages.ProfileStore)
 
 local Constants = require(ReplicatedStorage.Shared.Constants)
@@ -82,7 +83,7 @@ local PlayerDataService = Knit.CreateService({
 
 	_profileStore = nil :: any,
 	_profiles = {} :: { [Player]: any },
-	_loadedSignal = nil :: any,
+	_changedSignals = {} :: { [Player]: any },
 })
 
 function PlayerDataService:KnitInit()
@@ -138,6 +139,10 @@ function PlayerDataService:_loadProfile(player: Player)
 	profile.Data.LastSeenTime = os.time()
 
 	self._profiles[player] = profile
+	self._changedSignals[player] = Signal.new()
+
+	-- Сразу фаерим, чтобы подписчики получили начальное состояние
+	self._changedSignals[player]:Fire(profile.Data)
 
 	print(
 		string.format(
@@ -155,6 +160,11 @@ function PlayerDataService:_releaseProfile(player: Player)
 	if profile then
 		profile.Data.LastSeenTime = os.time()
 		profile:EndSession()
+	end
+	local signal = self._changedSignals[player]
+	if signal then
+		signal:Destroy()
+		self._changedSignals[player] = nil
 	end
 end
 
@@ -179,12 +189,22 @@ function PlayerDataService:WaitFor(player: Player, timeout: number?): any
 end
 
 -- Атомарно обновить данные профиля.
--- fn получает profile.Data и может его мутировать.
+-- fn получает profile.Data и может его мутировать. После выполнения fn фаерится Changed.
 function PlayerDataService:Update(player: Player, fn: (any) -> ())
 	local profile = self._profiles[player]
-	if profile then
-		fn(profile.Data)
+	if not profile then
+		return
 	end
+	fn(profile.Data)
+	local signal = self._changedSignals[player]
+	if signal then
+		signal:Fire(profile.Data)
+	end
+end
+
+-- Сигнал на изменения профиля. Фаерится с (profile.Data) при каждом Update + при первой загрузке.
+function PlayerDataService:GetChangedSignal(player: Player)
+	return self._changedSignals[player]
 end
 
 return PlayerDataService
