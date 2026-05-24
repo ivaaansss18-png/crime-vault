@@ -1,12 +1,20 @@
 --!strict
 -- CRIME VAULT — серверный entry point.
--- Этот скрипт стартует первым на сервере и поднимает GameManager.
+-- Поднимает Knit и регистрирует все сервисы из папки Services.
 
 print("[CRIME VAULT] Server bootstrap starting...")
 
--- TODO Этап 1: подключить Knit и GameManager
--- local Knit = require(game:GetService("ReplicatedStorage").Packages.Knit)
--- local GameManager = require(script.Parent.GameManager)
--- GameManager:Init()
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Knit = require(ReplicatedStorage.Packages.Knit)
+
+Knit.AddServices(script.Services)
+
+Knit.Start()
+	:andThen(function()
+		print("[CRIME VAULT] Knit started — all services initialized")
+	end)
+	:catch(function(err)
+		warn("[CRIME VAULT] Knit start failed:", err)
+	end)
 
 print("[CRIME VAULT] Server bootstrap finished.")
