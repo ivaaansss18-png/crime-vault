@@ -1,0 +1,7 @@
+# Aftman pins tool versions per project so both developers (and CI) run identical binaries.
+# Install Aftman once globally, then `aftman install` in this folder pulls the versions below.
+# Docs: https://github.com/LPGhatguy/aftman
+
+[tools]
+rojo = "rojo-rbx/rojo@7.4.4"
+wally = "UpliftGames/wally@0.3.2"

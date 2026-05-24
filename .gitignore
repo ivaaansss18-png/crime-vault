@@ -1,0 +1,32 @@
+# Wally packages (восстанавливаются командой `wally install`)
+/Packages/
+/ServerPackages/
+/DevPackages/
+
+# Rojo build artifacts
+/build/
+*.rbxl
+*.rbxlx
+*.rbxl.lock
+*.rbxlx.lock
+sourcemap.json
+
+# Скомпилированные модели (бэкап через rbxm идёт в assets/, но не в корень)
+*.rbxm
+*.rbxmx
+!/assets/**/*.rbxm
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+
+# Logs
+*.log
+
+# AI-тулинг (локальное состояние сессий, не для общего репо)
+.claude/
+.omc/
